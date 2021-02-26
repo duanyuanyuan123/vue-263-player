@@ -1,0 +1,34 @@
+{
+    "name": "vue-owt-player",
+    "version": "1.1.1",
+    "author": "dyy",
+    "description": "一个基于Alipayer和owt 开发并封装成vue组件的集成播放器.可播放,m3u8,mp4....视频.支持直播流与点播的基础功能外,视频的加密播放、清晰度切换、直播时移、连麦等业务场景",
+    "main": "lib/vue-263-player.umd.min.js",
+    "private": false,
+    "license": "MIT",
+    "scripts": {
+        "dev": "vue-cli-service serve",
+        "build": "vue-cli-service build",
+        "lint": "vue-cli-service lint",
+        "lib": "vue-cli-service build --target lib --name vue-263-player --dest lib packages/index.js"
+    },
+    "dependencies": {
+        "core-js": "^2.6.5",
+        "vue": "^2.6.10"
+    },
+    "devDependencies": {
+        "@vue/cli-plugin-babel": "^3.8.0",
+        "@vue/cli-plugin-eslint": "^3.8.0",
+        "@vue/cli-service": "^3.8.0",
+        "babel-eslint": "^10.0.1",
+        "eslint": "^5.16.0",
+        "eslint-plugin-vue": "^5.0.0",
+        "less": "^3.9.0",
+        "less-loader": "^5.0.0",
+        "vue-template-compiler": "^2.6.10"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/duanyuanyuan123/vue-263-player.git"
+    }
+}
