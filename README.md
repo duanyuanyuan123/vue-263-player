@@ -46,38 +46,28 @@ components:{ Vue263player: Vue263player.Player }
 <template>
     <div id="app">
         <template v-if="!isShowMultiple && show">
-            <vue-aliplayer-v2 :source="source" ref="VueAliplayerV2" :options="options" />
+            <Vue263player :source="source" 
+            ref="VueAliplayerV2" 
+            :options="options"
+            @micStatusChange="micStatusChange"
+            @baberrageStatusChange="baberrageStatusChange"
+            @error="playerError"
+            style="position: relative;"
+            />
         </template>
-        <div v-if="isShowMultiple && show" class="show-multiple">
-            <template v-for="x in 5">
-                <vue-aliplayer-v2 class="multiple-player" :key="x" :source="source" ref="VueAliplayerV2" :options="options" />
-            </template>
-        </div>
         <p class="remove-text" v-if="!show">播放器已销毁!</p>
         <div class="player-btns">
             <template v-if="!isShowMultiple && show">
                 <span @click="play()">播放</span>
                 <span @click="pause()">暂停</span>
                 <span @click="replay()">重播</span>
+                <span  @click="lianmai()">连麦</span>
+                <span  @click="addBarrage()">添加弹幕</span>
+                <span @click="disconnectMic()">下麦</span>
                 <span @click="getCurrentTime()">播放时刻</span>
                 <span @click="getStatus()">获取播放器状态</span>
             </template>
             <span @click="show = !show">{{ show ? '销毁' : '重载' }}</span>
-            <span @click="options.isLive = !options.isLive">{{ options.isLive ? '切换普通模式' : '切换直播模式' }}</span>
-            <span @click="showMultiple()">{{isShowMultiple ? '显示1个播放器' : '显示多个播放器'}}</span>
-        </div>
-        <div class="source-box">
-            <span class="source-label">选择播放源(支持动态切换):</span>
-            <select v-model="source" name="source" id="source">
-                <option value="//player.alicdn.com/video/aliyunmedia.mp4">播放源1</option>
-                <option value="//yunqivedio.alicdn.com/user-upload/nXPDX8AASx.mp4">播放源2</option>
-                <option value="//tbm-auth.alicdn.com/e7qHgLdugbzzKh2eW0J/kXTgBkjvNXcERYxh2PA@@hd_hq.mp4?auth_key=1584519814-0-0-fc98b2738f331ff015f7bf5c62394888">播放源3</option>
-                <option value="//ivi.bupt.edu.cn/hls/cctv1.m3u8">直播播放源4</option>
-            </select>
-        </div>
-        <div class="source-box">
-            <span class="source-label">输入播放源(支持动态切换):</span>
-            <input class="source-input" type="text" v-model="source">
         </div>
     </div>
 </template>
@@ -86,17 +76,25 @@ export default {
     data(){
         return {
             options: {
-                // source:'//player.alicdn.com/video/aliyunmedia.mp4',
-                isLive: true,   //切换为直播流的时候必填
-                // format: 'm3u8'  //切换为直播流的时候必填
+                isLive: false,   //切换为直播流的时候必填
+                autoplay: true,
+                rePlay: false,
+                playsinline: true,
+                preload: true,
+                controlBarVisibility: "hover",
+                useH5Prism: true,
+                mediaType:'video',
+                // useFlashPrism: false,    //指定为flash
+                // disableSeek: true //禁用进度条的Seek，默认值为false
             },
-            source: '//player.alicdn.com/video/aliyunmedia.mp4',
+            source: JSON.stringify({'LD':'//player.alicdn.com/video/aliyunmedia.mp4','SD':'//player.alicdn.com/video/aliyunmedia.mp4'}),
             // source: '//ivi.bupt.edu.cn/hls/cctv1.m3u8',
+            //http://ivi.bupt.edu.cn/hls/cctv1hd.m3u8
             show: true,
-            isShowMultiple: false
+            isShowMultiple: false,
         }
     },
-
+    
     methods:{
 
         play(){
@@ -106,37 +104,49 @@ export default {
         pause(){
             this.$refs.VueAliplayerV2.pause();
         },
-
+        lianmai(){
+            this.$refs.VueAliplayerV2.connectMic({roomId:'2834016832',userName:'dyy3'});
+        },
         replay(){
             this.$refs.VueAliplayerV2.replay();
         },
 
         getCurrentTime(){
-            // this.$refs.VueAliplayerV2.getCurrentTime();
-            this.source = 'http://ivi.bupt.edu.cn/hls/cctv1.m3u8';
+            this.$refs.VueAliplayerV2.getCurrentTime();
         },
 
         getStatus(){
            const status =  this.$refs.VueAliplayerV2.getStatus();
            console.log(`getStatus:`, status);
-           alert(`getStatus:${status}`);
         },
-
-        showMultiple(){
-            this.isShowMultiple = !this.isShowMultiple;
+        // 连麦状态发生改变触发
+        //连麦状态： 0->未连麦  1->正在连麦中  2->已连麦  3->被下麦 4->主动下麦成功 5->连麦失败
+        micStatusChange(micStatus){
+            console.log(micStatus)
         },
-
-       watch: {
-            source: {
-                handler() {
-                    this.show = !this.show
-                    setTimeout(()=>{   //设置延迟执行
-                        this.show = !this.show
-                    },1);
-                }
-            }
+        // 主动下麦
+        disconnectMic(){
+            this.$refs.VueAliplayerV2.disconnectMic();
+        },
+        /***
+         * 直播模式添加弹幕
+         */
+        addBarrage(){
+             this.$refs.VueAliplayerV2.addBarrage();
+        },
+        /***
+         * 
+         * 弹幕开关状态发生改变
+         */
+        baberrageStatusChange(value){
+            console.log(value);
+        },
+        /***
+         * 播放错误
+         */
+        playerError(err){
+            console.log(err)
         }
-
     }
 }
 </script>
@@ -179,7 +189,7 @@ export default {
 }
 .source-box{
     padding: 5px 10px;
-    margin-bottom: 20px;
+    margin-bottom: 10px;
     .source-label{
         margin-right: 20px;
         font-size: 16px;
@@ -213,17 +223,6 @@ props:{
         type: [Object],
         default: () => null
     },
-
-    cssLink:{   //css版本源
-        required: false,
-        type: [String],
-        default: `https://g.alicdn.com/de/prismplayer/2.9.0/skins/default/aliplayer-min.css`
-    },
-    scriptSrc:{ //js版本源
-        required: false,
-        type: [String],
-        default: `https://g.alicdn.com/de/prismplayer/2.9.0/aliplayer-min.js`
-    }
 }
 ```
 ### 3.1 配置项 options 属性
@@ -295,7 +294,7 @@ props:{
 // 暂停播放
 this.$refs.VueAliplayerV2.pause();
 ```
-可以参考 [播放器接口方法](https://help.aliyun.com/document_detail/125572.html?spm=a2c4g.11186623.6.1085.36fc6fc57WKZ5P#h2-u64ADu653Eu5668u63A5u53E32) 
+可以参考 [阿里云播放器接口方法](https://help.aliyun.com/document_detail/125572.html?spm=a2c4g.11186623.6.1085.36fc6fc57WKZ5P#h2-u64ADu653Eu5668u63A5u53E32) 
 
 | 名称        | 参数   |  说明  |
 | :-   | :-  | :-  |
@@ -329,6 +328,11 @@ this.$refs.VueAliplayerV2.pause();
 | getPreviewTime | - | 获取试看时间 |
 | isPreview | - | 是否试看 |
 | off | ev:事件名[String],handle,事件回调方法[Function] | 通过播放器实例的off方法取消绑定的方法 |
+ [自定义播放器接口方法]
+| 名称        | 参数   |  说明  |
+| connectMic | roomId,userName |   推送、接收RTC流  |
+| disconnectMic | BarrageContent |   取消推送、取消接收RTC流  |
+| addBarrage | roomId,userName |  添加弹幕 |
 
 ## 4.播放器事件
 
@@ -371,7 +375,11 @@ export default {
 | error  |  错误事件。  |
 | startSeek  |  开始拖拽，参数返回拖拽点的时间。  |
 | completeSeek  |  完成拖拽，参数返回拖拽点的时间。  |
-
+[自定义播放器事件]
+| 名称       |  说明  |
+| :-         | :-  |
+| micStatusChange  |  连麦状态发送改变 连麦状态： 0->未连麦  1->正在连麦中  2->已连麦  3->被下麦 4->主动下麦成功 5->连麦失败 |
+| baberrageStatusChange  | 弹幕开关状态发生改变 true/false |
 ---
 
 ## 5.缺陷 & 后期计划
@@ -393,6 +401,3 @@ See [Configuration Reference](https://cli.vuejs.org/config/).
 > v1.1.0 修复部分已知bug
 
 ---
-
-
-
